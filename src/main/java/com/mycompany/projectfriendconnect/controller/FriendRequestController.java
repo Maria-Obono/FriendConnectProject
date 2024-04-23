@@ -9,9 +9,6 @@ import com.mycompany.projectfriendconnect.POJO.User;
 
 import com.mycompany.projectfriendconnect.SERVICE.UserService;
 
-//import jakarta.servlet.http.HttpServletRequest;
-//import jakarta.servlet.http.HttpSession;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -44,7 +41,7 @@ public class FriendRequestController {
     public ModelAndView showFriendRequests(HttpSession session) {
         ModelAndView mav = new ModelAndView("friend_requests");
 
-        // Retrieve current user from session (assuming you have stored it during login)
+        // Retrieve current user from session
         User currentUser = (User) session.getAttribute("user");
 
         // Retrieve friend requests for the current user

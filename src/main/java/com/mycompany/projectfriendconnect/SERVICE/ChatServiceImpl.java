@@ -5,7 +5,6 @@
 package com.mycompany.projectfriendconnect.SERVICE;
 
 import com.mycompany.projectfriendconnect.DAO.ChatDao;
-import com.mycompany.projectfriendconnect.DAO.UserDao;
 import com.mycompany.projectfriendconnect.POJO.ChatRoom;
 import com.mycompany.projectfriendconnect.POJO.ChatRoomNotFoundException;
 
@@ -17,7 +16,6 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,15 +25,9 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 public class ChatServiceImpl implements ChatService {
-    
+
     @Autowired
     private ChatDao chatDao;
-    
-    
-
-   
-
-    
 
     @Override
     public ChatRoom getChatRoomById(Long roomId) {
@@ -52,9 +44,13 @@ public class ChatServiceImpl implements ChatService {
         return chatDao.getMessage(chatRoomId);
     }
 
-    
     @Override
     public void sendMessage(Long chatRoomId, Long senderId, String messageText) {
+        int maxLength = 25500; 
+    
+    if (messageText.length() > maxLength) {
+        messageText = messageText.substring(0, maxLength);
+    }
         // Retrieve the chat room by its ID
         ChatRoom chatRoom = chatDao.getChatRoomById(chatRoomId);
 
@@ -72,11 +68,10 @@ public class ChatServiceImpl implements ChatService {
         // Save the message using the DAO
         chatDao.saveMessage(message);
     }
-    
-@Override
+
+    @Override
     public User getFriendByChatRoomAndSender(Long chatRoomId, Long senderId) {
         return chatDao.getFriendByChatRoomAndSender(chatRoomId, senderId);
     }
-    
-    
+
 }

@@ -41,28 +41,13 @@ public interface UserService {
 
     boolean rejectFriendRequest(Long requestId);
 
-    Set<Long> getSentRequestUserIds(Long userId);
-
-    public Set<User> getSentRequestsUsers(Long userId);
-
-    public List<User> getAllUsersExceptAndNotSentRequests(Long userId, Set<User> sentRequestsUsers);
-
     boolean hasPendingRequest(Long senderId, Long recipientId);
 
     boolean hasAcceptedRequest(Long senderId, Long recipientId);
-
-    String getProfilePictureURL(Long userId);
 
     String uploadProfilePicture(Long userId, MultipartFile file) throws IOException;
 
     void updateProfilePicturePath(Long userId, String profilePicturePath);
     
     void deleteFriend(Long userId, Long friendId);
-
-    void cancelFriendRequest(User sender, long requestId);
-    
-    //boolean removeFriend(Long userId, Long friendId);
-    
-//void removeFriend(Long userId, Long friendId);
-
 }

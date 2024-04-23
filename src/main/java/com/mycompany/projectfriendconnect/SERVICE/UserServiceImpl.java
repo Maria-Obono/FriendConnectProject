@@ -4,36 +4,17 @@
  */
 package com.mycompany.projectfriendconnect.SERVICE;
 
-//import com.mycompany.projectfriendconnect.service.*;
-//import com.mycompany.projectfriendconnect.dao.UserDao;
-//import com.mycompany.projectfriendconnect.model.Login;
-//import com.mycompany.projectfriendconnect.model.User;
 import com.mycompany.projectfriendconnect.DAO.FriendRequestDao;
 import com.mycompany.projectfriendconnect.POJO.User;
 import com.mycompany.projectfriendconnect.DAO.UserDao;
 import com.mycompany.projectfriendconnect.POJO.FriendRequest;
 import com.mycompany.projectfriendconnect.POJO.FriendRequestStatus;
-
 import com.mycompany.projectfriendconnect.POJO.Login;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashSet;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-//import jakarta.transaction.Transactional;
-
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-
-//import org.springframework.security.core.Authentication;
-//import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -157,43 +138,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Set<Long> getSentRequestUserIds(Long userId) {
-        Set<Long> sentRequestUserIds = new HashSet<>();
-        List<FriendRequest> sentRequests = friendRequestDao.getSentRequests(userId);
-        for (FriendRequest request : sentRequests) {
-            sentRequestUserIds.add(request.getRecipient().getId());
-        }
-        return sentRequestUserIds;
-    }
-
-    @Override
-    @Transactional
-    public Set<User> getSentRequestsUsers(Long userId) {
-        User currentUser = userDao.getUserById(userId);
-        Set<User> sentRequestsUsers = currentUser.getSentRequests().stream()
-                .map(FriendRequest::getRecipient)
-                .collect(Collectors.toSet());
-        return sentRequestsUsers;
-    }
-
-    @Override
-    @Transactional
-    public List<User> getAllUsersExceptAndNotSentRequests(Long userId, Set<User> sentRequestsUsers) {
-        List<User> allUsersExceptCurrentUser = userDao.getAllUsersExcept(userId);
-
-        // Remove users to whom requests have already been sent
-        allUsersExceptCurrentUser.removeAll(sentRequestsUsers);
-
-        return allUsersExceptCurrentUser;
-    }
-
-    @Override
-    @Transactional
-    public void cancelFriendRequest(User sender, long requestId) {
-        userDao.cancelFriendRequest(sender, requestId);
-    }
-
-    @Override
     @Transactional
     public boolean areFriends(Long userId1, Long userId2) {
         return friendRequestDao.checkFriendRequestExists(userId1, userId2)
@@ -205,10 +149,6 @@ public class UserServiceImpl implements UserService {
         return userDao.getAllFriends(userId);
     }
 
-    //@Override
-    //public boolean hasSentRequest(Long senderId, Long recipientId) {
-    //    return userDao.hasSentRequest(senderId, recipientId);
-    // }
     @Override
     public boolean hasPendingRequest(Long senderId, Long recipientId) {
         return userDao.hasPendingRequest(senderId, recipientId);
@@ -246,27 +186,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String getProfilePictureURL(Long userId) {
-        User user = userDao.findById(userId);
-        if (user != null) {
-            return user.getProfilePicturePath();
-        }
-        return null;
-    }
-    
-  //@Override
-   // public void removeFriend(Long userId, Long friendId) {
-   //     userDao.removeFriend(userId, friendId);
-   // }
-    
-    //@Override
-    //public boolean removeFriend(Long userId, Long friendId) {
-    //    return userDao.removeFriend(userId, friendId);
-    //}
-    
-     @Override
     public void deleteFriend(Long userId, Long friendId) {
         userDao.deleteFriend(userId, friendId);
     }
-                
+
 }

@@ -25,8 +25,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import java.util.stream.Collectors;
-import javax.persistence.NoResultException;
-
 
 //import org.springframework.transaction.annotation.Transactional;
 /**
@@ -101,48 +99,31 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public User findById(Long userId) {
-        return entityManager.find(User.class, userId);
-    }
-    
-    
-
-    @Override
     public List<User> getAllFriends(Long userId) {
         // Retrieve friends where the user is the recipient and the request has been accepted
-    List<User> friendsReceived = entityManager.createQuery(
-            "SELECT fr.sender FROM FriendRequest fr WHERE fr.recipient.userId = :userId AND fr.status = :status",
-            User.class)
-            .setParameter("userId", userId)
-            .setParameter("status", FriendRequestStatus.ACCEPTED)
-            .getResultList();
+        List<User> friendsReceived = entityManager.createQuery(
+                "SELECT fr.sender FROM FriendRequest fr WHERE fr.recipient.userId = :userId AND fr.status = :status",
+                User.class)
+                .setParameter("userId", userId)
+                .setParameter("status", FriendRequestStatus.ACCEPTED)
+                .getResultList();
 
-    // Retrieve friends where the user is the sender and the request has been accepted
-    List<User> friendsSent = entityManager.createQuery(
-            "SELECT fr.recipient FROM FriendRequest fr WHERE fr.sender.userId = :userId AND fr.status = :status",
-            User.class)
-            .setParameter("userId", userId)
-            .setParameter("status", FriendRequestStatus.ACCEPTED)
-            .getResultList();
+        // Retrieve friends where the user is the sender and the request has been accepted
+        List<User> friendsSent = entityManager.createQuery(
+                "SELECT fr.recipient FROM FriendRequest fr WHERE fr.sender.userId = :userId AND fr.status = :status",
+                User.class)
+                .setParameter("userId", userId)
+                .setParameter("status", FriendRequestStatus.ACCEPTED)
+                .getResultList();
 
-    // Combine the two lists and remove duplicates
-    List<User> allFriends = new ArrayList<>(friendsReceived);
-    allFriends.addAll(friendsSent);
-    allFriends = allFriends.stream().distinct().collect(Collectors.toList());
+        // Combine the two lists and remove duplicates
+        List<User> allFriends = new ArrayList<>(friendsReceived);
+        allFriends.addAll(friendsSent);
+        allFriends = allFriends.stream().distinct().collect(Collectors.toList());
 
-    return allFriends;
+        return allFriends;
     }
 
-    //@Override
-    //  public boolean hasSentRequest(Long senderId, Long recipientId) {
-    //      Long count = entityManager.createQuery(
-    //         "SELECT COUNT(r) FROM FriendRequest r " +
-    //       "WHERE r.sender.userId = :senderId AND r.recipient.userId = :recipientId", Long.class)
-    //       .setParameter("senderId", senderId)
-    //       .setParameter("recipientId", recipientId)
-    //       .getSingleResult();
-    //  return count > 0;
-    // }  
     @Override
     public boolean hasPendingRequest(Long senderId, Long recipientId) {
         Long count = entityManager.createQuery(
@@ -178,84 +159,19 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public String getProfilePicturePath(Long userId) {
-        // Create a query to select the profile picture path for the given user ID
-        String query = "SELECT u.profilePicturePath FROM User u WHERE u.userId = :userId";
-        // Execute the query
-        String profilePicturePath = null;
-        try {
-            profilePicturePath = (String) entityManager.createQuery(query)
-                    .setParameter("userId", userId)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            // Handle if no result is found
-        }
-        return profilePicturePath;
+    public void deleteFriend(Long userId, Long friendId) {
+        // Retrieve the friend request
+        FriendRequest friendRequest = entityManager.createQuery(
+                "SELECT fr FROM FriendRequest fr WHERE (fr.sender.userId = :userId AND fr.recipient.userId = :friendId) OR "
+                + "(fr.sender.userId = :friendId AND fr.recipient.userId = :userId) AND fr.status = :status",
+                FriendRequest.class)
+                .setParameter("userId", userId)
+                .setParameter("friendId", friendId)
+                .setParameter("status", FriendRequestStatus.ACCEPTED)
+                .getSingleResult();
+
+        // Delete the friend request
+        entityManager.remove(friendRequest);
     }
-    
-//@Override
-    //public void removeFriend(Long userId, Long friendId) {
-      //  Session currentSession = entityManager.unwrap(Session.class);
 
-        // Fetch the user by ID
-        //User user = currentSession.find(User.class, userId);
-
-        //if (user != null) {
-            // Remove the friend from the user's friends list
-           // User friendToRemove = currentSession.find(User.class, friendId);
-           // if (friendToRemove != null) {
-             //   user.getFriends().remove(friendToRemove);
-                
-                // Update the user entity in the database
-               // currentSession.merge(user);
-            //}
-       // }
-        
-        // Repeat the same process for the friend's friends list to remove the user
-       // User friend = currentSession.find(User.class, friendId);
-        
-       // if (friend != null) {
-          //  User userToRemove = currentSession.find(User.class, userId);
-          //  if (userToRemove != null) {
-          //      friend.getFriends().remove(userToRemove);
-                
-                // Update the friend entity in the database
-            //    currentSession.merge(friend);
-           // }
-       // }
-   // }
- @Override
-public void deleteFriend(Long userId, Long friendId) {
-    // Retrieve the friend request
-    FriendRequest friendRequest = entityManager.createQuery(
-            "SELECT fr FROM FriendRequest fr WHERE (fr.sender.userId = :userId AND fr.recipient.userId = :friendId) OR " +
-            "(fr.sender.userId = :friendId AND fr.recipient.userId = :userId) AND fr.status = :status",
-            FriendRequest.class)
-            .setParameter("userId", userId)
-            .setParameter("friendId", friendId)
-            .setParameter("status", FriendRequestStatus.ACCEPTED)
-            .getSingleResult();
-    
-    // Delete the friend request
-    entityManager.remove(friendRequest);
-}
-
-
-    
-
-
-    @Override
-
-    public void cancelFriendRequest(User sender, long requestId) {
-        // Find the request by ID and remove it
-        FriendRequest friendRequest = entityManager.find(FriendRequest.class, requestId);
-        // Ensure the friend request is from the sender
-        if (friendRequest.getSender().equals(sender)) {
-            // Remove the friend request from the database
-            entityManager.remove(friendRequest);
-        }
-
-    }
-    
-   
 }

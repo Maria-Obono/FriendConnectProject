@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -31,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * @author mariagloriaraquelobono
  */
-
 @Controller
 public class LoginController {
 
@@ -57,6 +55,10 @@ public class LoginController {
         ModelAndView mav;
         User user = userService.validateUser(login);
 
+        // Set user in session
+        HttpSession session = request.getSession();
+        session.setAttribute("user", user);
+
         if (user != null) {
             mav = new ModelAndView("welcome");
             mav.addObject("firstname", user.getFirstname());
@@ -64,16 +66,16 @@ public class LoginController {
             // Add userId and imageName to the model if profilePicturePath is not null
             if (user.getProfilePicturePath() != null) {
                 // Add userId and imageName to the model
-                mav.addObject("userId", user.getUserId());
+                mav.addObject("userId", user.getId());
                 mav.addObject("imageName", user.getImageName());
             }
 
             // Add profilePicturePath to the model
             mav.addObject("profilePicturePath", user.getProfilePicturePath());
 
-            // Set user in session
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user);
+            // Clear any existing session attributes for profile pictures
+            session.removeAttribute("userId");
+            session.removeAttribute("imageName");
         } else {
             mav = new ModelAndView("login");
             mav.addObject("message", "Username or Password is wrong!!");
@@ -95,16 +97,19 @@ public class LoginController {
 
             // Add userId and imageName to the model if profilePicturePath is not null
             if (user.getProfilePicturePath() != null) {
-                // Extract imageName from profilePicturePath
-                String[] parts = user.getProfilePicturePath().split("/");
-                String imageName = parts[parts.length - 1]; // Get the last part which is the image name
+
                 // Add userId and imageName to the model
-                mav.addObject("userId", user.getUserId());
-                mav.addObject("imageName", imageName);
+                mav.addObject("userId", user.getId());
+                mav.addObject("imageName", user.getImageName());
+
+                // Update session attributes with new picture information
+                session.setAttribute("userId", user.getId());
+                session.setAttribute("imageName", user.getImageName());
             }
 
             // Add profilePicturePath to the model
             mav.addObject("profilePicturePath", user.getProfilePicturePath());
+
         }
 
         return mav;
@@ -124,17 +129,6 @@ public class LoginController {
 
             //to add the user's ID for constructing the image URL
             mav.addObject("userId", user.getId());
-
-        // Add the user's profile picture path if available
-            if (user.getProfilePicturePath() != null) {
-                // Extract the image name from the profile picture path
-                String[] parts = user.getProfilePicturePath().split("/");
-                String imageName = parts[parts.length - 1];
-
-                // Add the image name to the model
-                mav.addObject("imageName", imageName);
-            }
-
         }
 
         return mav;
@@ -170,6 +164,8 @@ public class LoginController {
 
                 // Set profilePicturePath in session attribute for immediate use
                 session.setAttribute("profilePicturePath", filePath);
+                // Update the user object with the new profile picture path
+                user.setProfilePicturePath(filePath);
 
                 // Update session attributes with new picture information
                 session.setAttribute("userId", user.getId());

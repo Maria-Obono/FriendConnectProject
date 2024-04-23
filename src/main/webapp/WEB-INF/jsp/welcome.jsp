@@ -13,6 +13,11 @@
 
         <title>Welcome</title>
         <link href="<c:url value="/css/styles.css" />" rel="stylesheet">
+        <style>
+            .profile-upload {
+                background-image: url('<c:url value="/images/welcomes.jpeg" />');
+            }
+        </style>
 
     </head>
     <body>
@@ -20,16 +25,16 @@
             <div class="header">
                 <div class="welcome-message">
                     <h2>Welcome ${firstname}!</h2>
-                    
-            <a href="login.htm" class="exit-button">Log out</a>
-            
+
+                    <a href="login.htm" class="exit-button">Log out</a>
+
                 </div>
 
                 <h1 class="logo">FriendConnect</h1>
             </div>
             <!-- Display the profile picture -->
             <c:choose>
-                <c:when test="${not empty profilePicturePath}">
+                <c:when test="${not empty userId and not empty imageName}">
                     <div class="profile-upload">
                         <div class="profile-picture-container">
                             <img src="/ProjectFriendConnect/pictures/images/${userId}/${imageName}.htm" alt="Profile Picture" class="profile-picture">
@@ -37,6 +42,7 @@
                         </div>
                         <form action="uploadProfilePicture.htm" method="post" enctype="multipart/form-data">
                             <input type="file" name="file" id="fileInput" accept="image/*" required style="display: none;">
+                            <input type="hidden" name="userId" value="${userId}">
                             <input type="submit" value="Save Picture">
                         </form>
                     </div>
@@ -55,9 +61,10 @@
                 </c:otherwise>
             </c:choose>
 
+
             <div class="action-buttons">
                 <a href="findFriends.htm" class="action-button">
-                 <img src="<c:url value='/images/find-friends.avif'/>" alt="Find Friends" class="profile-picture">   
+                    <img src="<c:url value='/images/find-friends.avif'/>" alt="Find Friends" class="profile-picture">   
                     <br>Friend Suggestions
                 </a>
                 <a href="friendRequests.htm" class="action-button">
@@ -69,12 +76,12 @@
                     <br>Chats
                 </a>
                 <a href="friendList.htm" class="action-button">
-                   <img src="<c:url value='/images/friends.jpeg'/>" alt="Friends" class="profile-picture">
+                    <img src="<c:url value='/images/friends.jpeg'/>" alt="Friends" class="profile-picture">
                     <br>Friends
                 </a>
             </div>
 
         </div>
-        
+
     </body>
 </html>

@@ -12,6 +12,11 @@
     <meta charset="UTF-8">
     <title>Login Page</title>
     <link href="<c:url value="/css/styles.css" />" rel="stylesheet">
+    <style>
+        .login-container {
+            background-image: url('<c:url value="/images/background.jpeg" />');
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
